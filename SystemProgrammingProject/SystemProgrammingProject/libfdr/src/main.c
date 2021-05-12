@@ -11,7 +11,6 @@ typedef struct {
 
 void removeChar(char* s, char c)
 {
- 
     int j, n = strlen(s);
     for (int i = j = 0; i < n; i++)
         if (s[i] != c)
