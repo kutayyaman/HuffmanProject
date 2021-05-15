@@ -19,6 +19,17 @@ void removeChar(char * s, char c) {
     s[j] = '\0';
 }
 
+void freeJsonITEM(JsonITEM* jsonItem){
+if(jsonItem!=NULL){
+	if(jsonItem->key!=NULL)
+	free(jsonItem->key);
+	if(jsonItem->value!=NULL)
+	free(jsonItem->value);
+	if(jsonItem!=NULL)
+	free(jsonItem);
+	}
+}
+
 int main(int argc, char ** argv) {
     JRB t, tmp;
     IS is;
@@ -66,7 +77,7 @@ int main(int argc, char ** argv) {
     		printf("dosya yok!\n");
     		return 0;
     	}
-  
+  	jettison_inputstruct(is);
         is = new_inputstruct(argv[2]);
         if(is==NULL){
           printf("acilmaya calisilan dosya bulunamadi!\n");
@@ -75,15 +86,22 @@ int main(int argc, char ** argv) {
 
         FILE *fp=fopen(argv[3],"w");
         printf("encrypt ediliyor\n");
-        while (get_line(is) >= 0) {
+        while (get_line(is) >= 0) {                               
             for (i = 0; i < is -> NF; i++) {
+             int flag=0;
                 jrb_traverse(tmp, t) {
                     p = (JsonITEM * ) tmp -> val.v;
                     if (!strcmp(is -> fields[i], p -> key)) {
+                    flag=1;
     					fprintf(fp,"%s ",p->value);
-                    }
+                    }                    
                 }
+               if(flag==0)
+               {
+            	 fprintf(fp,"%s ",is->fields[i]);  
+               }
             }
+           
         }
         printf("encrypt edildi\n");
         fclose(fp);
@@ -95,7 +113,7 @@ int main(int argc, char ** argv) {
     		printf("dosya yok!\n");
     		return 0;
     	}
-    	
+    	jettison_inputstruct(is);
         is = new_inputstruct(argv[2]);
         if(is==NULL){
          printf("acilmaya calisilan dosya bulunamadi!\n");
@@ -105,20 +123,33 @@ int main(int argc, char ** argv) {
         FILE *fp=fopen(argv[3],"w");
         
         printf("dencrypt ediliyor\n");
-        while (get_line(is) >= 0) {
+        while (get_line(is) >= 0) {          
             for (i = 0; i < is -> NF; i++) {
+                int flag=0;
                 jrb_traverse(tmp, t) {
                     p = (JsonITEM * ) tmp -> val.v;
                     if (!strcmp(is -> fields[i], p -> value)) {
+                    flag=1;
     					fprintf(fp,"%s ",p->key);
                     }
                 }
+               if(flag==0)
+               {
+            	 fprintf(fp,"%s ",is->fields[i]);  
+               }
             }
         }
         printf("dencrypt edildi\n");
         fclose(fp);
     }
     
+    jrb_traverse(tmp, t) {
+                    p = (JsonITEM * ) tmp -> val.v;
+
+                    if (p!=NULL) {
+    					freeJsonITEM(p);
+                    }
+                }
 
     jettison_inputstruct(is);
     return 0;
